@@ -1,6 +1,6 @@
 import React, { MouseEventHandler, useCallback, useEffect, useReducer, useRef, useState } from "react";
 
-import { Symbol, SymbolSort, SymbolTicker, SymbolTickerResponse } from "../models";
+import { Symbol, SymbolTicker, SymbolTickerResponse } from "../models";
 import { Table } from "src/features/exchange/components/table";
 import { sortReducer } from "src/features/exchange/store";
 import { TableHeader } from "src/features/exchange/components/table-header";
@@ -10,7 +10,7 @@ import { ThemeSwitch } from "src/features/exchange/components/theme-switch";
 const API = "wss://api.exchange.bitcoin.com/api/2/ws";
 const DISPLAY_COUNT = 50;
 
-export const Exchange = () => {
+const useExchange = () => {
     const tempData = useRef<Map<string, SymbolTicker>>(new Map());
     const [symbols, setSymbols] = useState<Map<string, Symbol>>();
     const [socket, setSocket] = useState<WebSocket>();
@@ -127,6 +127,18 @@ export const Exchange = () => {
         },
         [displayCount, setDisplayCount]
     );
+
+    return {
+        sort,
+        setSort,
+        displayCount,
+        onClickDisplayCount,
+        data,
+    };
+};
+
+export const Exchange = () => {
+    const { sort, setSort, displayCount, onClickDisplayCount, data } = useExchange();
 
     const baseClass = EXCHANGE;
     return (

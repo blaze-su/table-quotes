@@ -12,10 +12,9 @@ type TableProps = {
     setSort: React.Dispatch<SortReducerAction>;
 };
 
-export const Table = memo((props: TableProps) => {
+const useTable = (props: TableProps) => {
     const { data, sort, disolayCount } = props;
     const { key, direction } = sort;
-    const baseClass = EXCHANGE;
 
     const preparedData = disolayCount ? data.slice(0, disolayCount) : data;
     const sortDirection = direction === "ASC" ? 1 : -1;
@@ -23,9 +22,18 @@ export const Table = memo((props: TableProps) => {
         return (Number(a[key]) - Number(b[key])) * sortDirection;
     });
 
+    return {
+        data: preparedData,
+    };
+};
+
+export const Table = memo((props: TableProps) => {
+    const { data } = useTable(props);
+
+    const baseClass = EXCHANGE;
     return (
         <div className={`${baseClass}__table`}>
-            {preparedData.map((symbolTicker) => {
+            {data.map((symbolTicker) => {
                 return <TableRow key={symbolTicker.symbol} data={symbolTicker} />;
             })}
         </div>

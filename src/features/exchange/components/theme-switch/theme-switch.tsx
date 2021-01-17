@@ -1,6 +1,6 @@
 import { MouseEventHandler, useCallback, useEffect, useState } from "react";
 
-export const ThemeSwitch = () => {
+const useThemeSwitch = () => {
     const [state, setState] = useState<"light" | "dark">("light");
 
     useEffect(() => {
@@ -12,6 +12,15 @@ export const ThemeSwitch = () => {
             return prev === "dark" ? "light" : "dark";
         });
     }, [setState]);
+
+    return {
+        state,
+        onToggle,
+    };
+};
+
+export const ThemeSwitch = () => {
+    const { state, onToggle } = useThemeSwitch();
 
     const baseClass = "theme-switch";
     let style = `${baseClass}__pointer`;

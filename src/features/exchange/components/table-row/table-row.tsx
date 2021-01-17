@@ -1,4 +1,4 @@
-import React, { memo, useRef } from "react";
+import React, { memo } from "react";
 
 import { SymbolModels, SymbolTicker } from "src/models";
 import { EXCHANGE } from "../..";

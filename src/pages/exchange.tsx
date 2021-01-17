@@ -8,7 +8,7 @@ import { EXCHANGE } from "src/features/exchange";
 import { ThemeSwitch } from "src/features/exchange/components/theme-switch";
 
 const API = "wss://api.exchange.bitcoin.com/api/2/ws";
-const FRAME_TIME = 1000 / 10;
+const FRAME_TIME = 1000 / 6;
 const DISPLAY_COUNT = 50;
 
 const useExchange = () => {

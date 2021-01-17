@@ -70,12 +70,12 @@
 
         &--up {
             animation-name: cell-up-animation;
-            animation-duration: 0.5s;
+            animation-duration: 1s;
         }
 
         &--down {
             animation-name: cell-down-animation;
-            animation-duration: 0.5s;
+            animation-duration: 1s;
         }
     }
 }

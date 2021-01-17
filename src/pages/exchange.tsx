@@ -8,12 +8,15 @@ import { EXCHANGE } from "src/features/exchange";
 import { ThemeSwitch } from "src/features/exchange/components/theme-switch";
 
 const API = "wss://api.exchange.bitcoin.com/api/2/ws";
+const FRAME_TIME = 1000 / 10;
 const DISPLAY_COUNT = 50;
 
 const useExchange = () => {
+    const syncTimerId = useRef<number>(0);
+    const syncList = useRef<Map<string, SymbolTicker>>(new Map());
     const tempData = useRef<Map<string, SymbolTicker>>(new Map());
+    const socket = useRef<WebSocket>();
     const [symbols, setSymbols] = useState<Map<string, Symbol>>();
-    const [socket, setSocket] = useState<WebSocket>();
     const [displayCount, setDisplayCount] = useState(0);
     const [data, setData] = useState<SymbolTicker[]>([]);
     const [sort, setSort] = useReducer(sortReducer, {
@@ -38,20 +41,29 @@ const useExchange = () => {
         [symbols, setData]
     );
 
+    const updateFrame = useCallback(() => {
+        setData((prev) => {
+            const data = [...prev];
+
+            syncList.current.forEach((symbolTicker) => {
+                const foundIndex = prev.findIndex(({ symbol }) => symbol === symbolTicker.symbol);
+                data[foundIndex] = { ...prev[foundIndex], ...symbolTicker };
+            });
+
+            return data;
+        });
+        syncList.current.clear();
+    }, [syncList, setData]);
+
     const updateListner = useCallback(
         (e) => {
             const res: SymbolTickerResponse = JSON.parse(e.data);
-            if (res.method === "ticker") {
-                const { params: symbolTicker } = res;
-                setData((prev) => {
-                    const data = [...prev];
-                    const foundIndex = prev.findIndex(({ symbol }) => symbol === symbolTicker.symbol);
-                    data[foundIndex] = { ...prev[foundIndex], ...symbolTicker };
-                    return data;
-                });
-            }
+            if (res.method !== "ticker") return;
+
+            const { params: symbolTicker } = res;
+            syncList.current.set(symbolTicker.symbol, symbolTicker);
         },
-        [setData]
+        [syncList, setData]
     );
 
     const initListner = useCallback(
@@ -71,29 +83,37 @@ const useExchange = () => {
                     tempData.current.set(symbolTicker.symbol, symbolTicker);
                     if (symbols?.size === tempData.current.size) {
                         initData(tempData.current);
-                        setSocket((socket) => {
-                            socket!.onmessage = updateListner;
-                            return socket;
-                        });
+                        socket.current!.onmessage = updateListner;
                     }
                     break;
             }
         },
-        [symbols, setSymbols, setSocket, initData]
+        [symbols, setSymbols, initData]
+    );
+
+    const onClickDisplayCount: MouseEventHandler = useCallback(
+        (e) => {
+            e.preventDefault();
+            setDisplayCount((prev) => (!prev ? DISPLAY_COUNT : 0));
+        },
+        [displayCount, setDisplayCount]
     );
 
     useEffect(() => {
-        const socket = new WebSocket(API);
-        setSocket(socket);
-        return () => socket.close();
+        socket.current = new WebSocket(API);
+        syncTimerId.current = Number(setInterval(updateFrame, FRAME_TIME));
+
+        return () => {
+            if (socket.current) socket.current.close();
+            clearInterval(syncTimerId.current);
+        };
     }, []);
 
     useEffect(() => {
-        if (socket && !socket.onmessage) {
-            socket.onopen = function (e) {
-                console.log("WebSocket:connnected");
-                socket.onmessage = initListner;
-                socket.send(
+        if (socket.current && !socket.current.onmessage) {
+            socket.current.onopen = (e) => {
+                socket.current!.onmessage = initListner;
+                socket.current!.send(
                     JSON.stringify({
                         method: "getSymbols",
                         params: {},
@@ -105,11 +125,11 @@ const useExchange = () => {
     }, [socket]);
 
     useEffect(() => {
-        if (!socket || !symbols) return;
+        if (!socket.current || !symbols) return;
 
-        socket.onmessage = initListner;
+        socket.current.onmessage = initListner;
         symbols?.forEach((_, symbol) => {
-            socket.send(
+            socket.current?.send(
                 JSON.stringify({
                     method: "subscribeTicker",
                     params: {
@@ -119,14 +139,6 @@ const useExchange = () => {
             );
         });
     }, [symbols]);
-
-    const onClickDisplayCount: MouseEventHandler = useCallback(
-        (e) => {
-            e.preventDefault();
-            setDisplayCount((prev) => (!prev ? DISPLAY_COUNT : 0));
-        },
-        [displayCount, setDisplayCount]
-    );
 
     return {
         sort,

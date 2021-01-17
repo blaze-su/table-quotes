@@ -1,0 +1,103 @@
+.exchange {
+    &__display-count {
+        border: 1px solid var(--clr-link);
+        color: var(--clr-link);
+        background: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        outline: none;
+
+        &:active {
+            border: 1px solid var(--clr-link-active);
+            color: var(--clr-link-active);
+        }
+    }
+
+    &__header {
+        width: 100%;
+        display: flex;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid var(--clr-border);
+    }
+
+    &__header-title {
+        color: var(--clr-text);
+    }
+
+    &__header-sort {
+        position: relative;
+        display: flex;
+        font-weight: bold;
+        width: 16.666%;
+        padding: 10px 10px 10px 14px;
+        background: none;
+        border: none;
+        outline: none;
+    }
+
+    &__header-arrow {
+        position: absolute;
+        left: 0;
+        width: 16px;
+        height: 16px;
+        path {
+            stroke: var(--clr-text);
+        }
+
+        &--desc {
+            transform: rotate(180deg);
+        }
+    }
+
+    &__row {
+        width: 100%;
+        display: flex;
+        margin-bottom: 1px;
+    }
+
+    &__row:nth-child(odd) {
+        background: var(--clr-odd-row);
+    }
+
+    &__cell {
+        width: 16.666%;
+        padding: 10px 5px;
+        margin-right: 1px;
+        border-radius: 2px;
+
+        &--up {
+            animation-name: cell-up-animation;
+            animation-duration: 0.5s;
+        }
+
+        &--down {
+            animation-name: cell-down-animation;
+            animation-duration: 0.5s;
+        }
+    }
+}
+
+@keyframes cell-up-animation {
+    from {
+        color: var(--clr-sucsess);
+        background-color: var(--clr-sucsess-light);
+    }
+    to {
+        background-color: inherit;
+        color: inherit;
+    }
+}
+
+@keyframes cell-down-animation {
+    from {
+        color: var(--clr-danger);
+        background-color: var(--clr-danger-light);
+    }
+    to {
+        background-color: inherit;
+        color: inherit;
+    }
+}

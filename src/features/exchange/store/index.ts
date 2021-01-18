@@ -13,7 +13,6 @@ export const sortReducer = (state: SymbolSort, action: SortReducerAction): Symbo
             } else {
                 return { key: action.payload, direction: "ASC" };
             }
-            break;
         default:
             throw new Error();
     }

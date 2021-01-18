@@ -29,7 +29,7 @@ const useTableCell = (props: TableCellProps) => {
         tableCellRef.current.getAnimations().find((animation, i) => {
             //@ts-ignore
             const { animationName } = animation;
-            if (prevAnimationName.current == animationName) {
+            if (prevAnimationName.current === animationName) {
                 animation.cancel();
                 animation.play();
             }

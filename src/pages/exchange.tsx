@@ -63,7 +63,7 @@ const useExchange = () => {
             const { params: symbolTicker } = res;
             syncList.current.set(symbolTicker.symbol, symbolTicker);
         },
-        [syncList, setData]
+        [syncList]
     );
 
     const initListner = useCallback(
@@ -88,7 +88,7 @@ const useExchange = () => {
                     break;
             }
         },
-        [symbols, setSymbols, initData]
+        [symbols, setSymbols, initData, updateListner]
     );
 
     const onClickDisplayCount: MouseEventHandler = useCallback(
@@ -96,7 +96,7 @@ const useExchange = () => {
             e.preventDefault();
             setDisplayCount((prev) => (!prev ? DISPLAY_COUNT : 0));
         },
-        [displayCount, setDisplayCount]
+        [setDisplayCount]
     );
 
     useEffect(() => {
@@ -107,7 +107,7 @@ const useExchange = () => {
             if (socket.current) socket.current.close();
             clearInterval(syncTimerId.current);
         };
-    }, []);
+    }, [updateFrame]);
 
     useEffect(() => {
         if (socket.current && !socket.current.onmessage) {
@@ -122,7 +122,7 @@ const useExchange = () => {
                 );
             };
         }
-    }, [socket]);
+    }, [socket, initListner]);
 
     useEffect(() => {
         if (!socket.current || !symbols) return;
@@ -138,7 +138,7 @@ const useExchange = () => {
                 })
             );
         });
-    }, [symbols]);
+    }, [symbols, initListner]);
 
     return {
         sort,
